@@ -1,0 +1,4 @@
+1. fix bug concerning the calculation of the neurons' values from one timestep to another (create temporrary aray -> swap): Flo
+2. add activity tracker to each neuron (and write the values into a file/plot them): Henri
+3. determine whether neuron is healthy or ill according to activity
+4. state wheter network is suffering from "Parkinson disease"
