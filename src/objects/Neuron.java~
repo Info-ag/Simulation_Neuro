@@ -8,28 +8,16 @@ public class Neuron {
 	private ArrayList<Neuron> zielknoten = new ArrayList<>();
 	private ArrayList<Double> wichtung = new ArrayList<>();
 	private ArrayList<Double> dist = new ArrayList<>();
-	private static ArrayList<Integer> anzahl_gleichzeitigesFeuern = new ArrayList<>();
-	private static int feuern_counter = 0;
-	//private ArrayList<Boolean> activity = new ArrayList<>();
-	
-	
-	private int n = 0; 
-
-	private static int activityTime = 10; //states, how many seconds this.activity should hold
-	
-	private double perc_per_step = 0.05;
+	private final double perc_per_step = 0.05;
 	private final double ruhepot = -70;//mV
 	private double ladung = this.ruhepot;
 	private final double schwelle_normal = -30;
 	private double schwellenwert = this.schwelle_normal;
-	private double feuer_wert = 20;
+	private final double feuer_wert = 20;
 	private ArrayList<Double[]> signale = new ArrayList<>();//[0] - Ladung  |  [1] - Counter
 	private ArrayList<Neuron> quellen = new ArrayList<>();
 	private boolean active = false;
-	
-	
-	private static int selbsthemmung = 20; //sobald selbsthemmung = 0 -> schwellenwert = -30
-	private static int critical_fire_rate = 50;
+	private final double selbsthemmung = 50;
 	
 	private boolean apoptose = false;
 	public boolean getApoptose () {return this.apoptose;}
@@ -41,50 +29,9 @@ public class Neuron {
 	public Neuron (Point pos) {
 		this.pos = pos;
 	}
-
+	
 	public ArrayList<Double> getDists () {
 		return this.dist;
-	}
-	
-	public static ArrayList<Integer> get_gleichzeitgesFeuern() {
-		return anzahl_gleichzeitigesFeuern;
-	}
-	
-	public static void reset_gleichzeitgesFeuern() {
-		anzahl_gleichzeitigesFeuern.clear();
-	}
-	
-	public static int get_critical_fire_rate() {
-		return critical_fire_rate;
-	}
-	
-	public static void store_gleichzeitigsFeuern() {
-		anzahl_gleichzeitigesFeuern.add(feuern_counter);
-		feuern_counter = 0;
-	}
-	
-	public static int get_selbsthemmung() {
-		return selbsthemmung;
-	}
-	
-	public static void set_selbsthemmung(int a) {
-		selbsthemmung = a;
-	}
-	
-	public static int get_activityTime() {
-		return activityTime;
-	}
-	
-	public double get_schwellenwert() {
-		return this.schwellenwert;
-	}
-	
-	public double get_ladung() {
-		return this.ladung;
-	}
-	
-	public void set_ladung(double a) {
-		this.ladung = a;
 	}
 	
 	public ArrayList<Neuron> getQuelle () {
@@ -110,10 +57,10 @@ public class Neuron {
 	public void addZielknoten (Neuron zielknoten, double dist) {
 		this.zielknoten.add(zielknoten);
 		this.dist.add(dist);
-		this.wichtung.add(Math.random()*2-1);
+		this.wichtung.add(Math.random()*2-1);//TODO: Gewichte der Verbindungen anpassen
 	}
 	
-	public static void set_up (ArrayList<Neuron> neuron) { //verbindet die Neuronen
+	public static void set_up (ArrayList<Neuron> neuron) {
 		double sigma = Main.getConnProb()*Main.getNetzG();
 		double d = 0;
 		
@@ -141,21 +88,6 @@ public class Neuron {
 		this.ladung += d;
 	}
 	
-	public double calc_activity(){ //return activity = times fired within last 10 seconds
-		/*int n = 0;
-		for(int i = 0; i < this.activity.size(); i++)
-		{
-			if(this.activity.get(i).equals(true))
-			{
-				n++;
-			}
-		}
-				
-		System.out.println(n);*/
-		
-		return (double)this.n;///(double)this.n_counter;
-	}
-	
 	public double getGes () {
 		return this.f_ges;
 	}
@@ -179,7 +111,7 @@ public class Neuron {
 		this.active = true;
 		this.ladung = this.ruhepot;
 		for (int i=0; i<zielknoten.size(); i++) {
-			this.zielknoten.get(i).addPing(new Double[]{(this.ladung - this.schwellenwert + 5)*this.wichtung.get(i), this.dist.get(i)/perc_per_step}, this);
+			this.zielknoten.get(i).addPing(new Double[]{feuer_wert*this.wichtung.get(i), this.dist.get(i)/perc_per_step}, this);
 		}
 		this.schwellenwert += this.selbsthemmung;//Selbsthemmung
 	}
@@ -188,16 +120,6 @@ public class Neuron {
 		return this.active;
 	}
 	
-	public void set_n(int a)
-	{
-		n = a;
-	}
-	
-	public int get_n()
-	{
-		return this.n;
-	}
-
 	public void calc () {
 		Double[] tmp;
 		for (int i=0; i<this.signale.size(); i++) {
@@ -216,21 +138,11 @@ public class Neuron {
 		this.active = false;
 		
 		if (this.ladung < 3*this.ruhepot) {this.ladung = 3*this.ruhepot;}
-		if (this.ladung > 200) {this.ladung = 200;}
-
 		if (this.ladung > this.schwellenwert) {
 			this.fire();
-			this.n += 1;
-			feuern_counter++;
 		}
-
-		if(this.n >= critical_fire_rate)
-		{
-			this.f_ges = 0;
-		}
-
 		this.schwellenwert -= this.schwelle_normal;
-		this.schwellenwert *= 0.95;
+		this.schwellenwert *= 0.93;
 		this.schwellenwert += this.schwelle_normal;
 	}
 }
