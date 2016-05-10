@@ -53,7 +53,7 @@ public class Main extends JPanel {
 	private static Color c_dop_max = new Color(0x545454);
 	private static Color c_dop_min = new Color(0xC6C6C6);
 	private static double f_dop = 1.0;
-	
+	private static int tmp_counter = 0;
     private static File logfile = new File ("log");
     
 	public static PrintWriter writer = null;
@@ -79,6 +79,7 @@ public class Main extends JPanel {
 	private static long timestamp_log;
 	private static long step_millis = 30;
 	int c = 0;
+	private static double activity_mean = 0.0;
 	private Neuron input_neuron = new Neuron(new Point(0, 0.5));
 	
 	private static double sq (double x) {
@@ -149,7 +150,6 @@ public class Main extends JPanel {
 	}
 	
 	public void paint (Graphics g) {
-		status.refresh();
 
 		super.paintComponent(g);
 		g.setColor(mixColor(c_dop_max, c_dop_min, f_dop));
@@ -224,6 +224,8 @@ public class Main extends JPanel {
 					n++;
 				}	
 			}
+			status.refresh();
+
 			ill_counter = n;
 			n = 0;
 			
@@ -239,6 +241,15 @@ public class Main extends JPanel {
 			writer.flush();
 			Neuron.reset_gleichzeitgesFeuern();
 			timestamp_log = System.currentTimeMillis();
+			
+			if(tmp_counter % 5 == 0)
+			{
+				/*Neuron.set_selbsthemmung(Neuron.get_selbsthemmung() - 10);
+				writer.println("Selbsthemmung: " + Neuron.get_selbsthemmung());
+
+				status.refresh();*/
+			}
+			tmp_counter++;
 		}
 		
 		
@@ -265,6 +276,11 @@ public class Main extends JPanel {
 		return ill_counter;
 	}
 	
+	public static double get_activity_mean()
+	{
+		return activity_mean;
+	}
+	
 	private static void invoke_clearing_of_activity () {
 		for (int i=0; i<neuron.size(); i++) {
 			
@@ -281,7 +297,7 @@ public class Main extends JPanel {
 	
 	private static double calc_netActivity()
 	{
-		double activity_mean = 0.0;
+		
 		
 		for(int i = 0; i < netz_g; i++)
 		{

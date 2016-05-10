@@ -22,14 +22,14 @@ public class Neuron {
 	private double ladung = this.ruhepot;
 	private final double schwelle_normal = -30;
 	private double schwellenwert = this.schwelle_normal;
-	private double feuer_wert = 20;
 	private ArrayList<Double[]> signale = new ArrayList<>();//[0] - Ladung  |  [1] - Counter
 	private ArrayList<Neuron> quellen = new ArrayList<>();
 	private boolean active = false;
 	
 	
-	private static int selbsthemmung = 20; //sobald selbsthemmung = 0 -> schwellenwert = -30
-	private static int critical_fire_rate = 50;
+	private static int selbsthemmung = 150; //sobald selbsthemmung = 0 -> schwellenwert = -30
+	private static int normal_fire_rate = 19; //normal fire rate of a neuron (in last 10s) at selbsthemmung = 150. determined by doing statistics (trying different sample-nets. corresponds to calc_netAcivity )
+	private static int critical_fire_rate = 3 * normal_fire_rate;
 	
 	private boolean apoptose = false;
 	public boolean getApoptose () {return this.apoptose;}
@@ -179,9 +179,9 @@ public class Neuron {
 		this.active = true;
 		this.ladung = this.ruhepot;
 		for (int i=0; i<zielknoten.size(); i++) {
-			this.zielknoten.get(i).addPing(new Double[]{(this.ladung - this.schwellenwert + 5)*this.wichtung.get(i), this.dist.get(i)/perc_per_step}, this);
+			this.zielknoten.get(i).addPing(new Double[]{(this.ladung - this.schwellenwert + 0)*this.wichtung.get(i), this.dist.get(i)/perc_per_step}, this);
 		}
-		this.schwellenwert += this.selbsthemmung;//Selbsthemmung
+		this.schwellenwert += selbsthemmung;//Selbsthemmung
 	}
 	
 	public boolean getActive () {
